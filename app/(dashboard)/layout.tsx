@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { Header } from "@/components/dashboard/header"
+import { BottomNav } from "@/components/dashboard/bottom-nav"
 
 export default async function DashboardLayout({
   children,
@@ -40,8 +41,9 @@ export default async function DashboardLayout({
       </aside>
       <div className="lg:pl-64">
         <Header orgName={orgName} userName={userName} userRole={userRole} />
-        <main className="p-6">{children}</main>
+        <main className="p-6 pb-24 lg:pb-6">{children}</main>
       </div>
+      <BottomNav />
     </div>
   )
 }

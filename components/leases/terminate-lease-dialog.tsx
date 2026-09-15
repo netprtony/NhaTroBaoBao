@@ -56,13 +56,15 @@ export function TerminateLeaseDialog({
       <DialogContent className="sm:max-w-[440px]">
         <DialogHeader>
           <DialogTitle className="text-amber-600">Xác nhận thanh lý / kết thúc hợp đồng</DialogTitle>
-          <DialogDescription className="space-y-2 pt-2">
-            <p>
-              Bạn có chắc chắn muốn kết thúc hợp đồng thuê của khách <strong>{tenantName}</strong> tại phòng <strong>P.{roomCode}</strong>?
-            </p>
-            <p className="text-xs text-muted-foreground bg-amber-50 p-2.5 rounded-md border border-amber-200">
-              ⚡ Sau khi kết thúc, phòng này sẽ tự động được chuyển về trạng thái <strong>Trống</strong> để sẵn sàng cho khách mới thuê.
-            </p>
+          <DialogDescription asChild className="space-y-2 pt-2">
+            <div>
+              <p>
+                Bạn có chắc chắn muốn kết thúc hợp đồng thuê của khách <strong>{tenantName}</strong> tại phòng <strong>P.{roomCode}</strong>?
+              </p>
+              <p className="text-xs text-muted-foreground bg-amber-50 p-2.5 rounded-md border border-amber-200">
+                ⚡ Sau khi kết thúc, phòng này sẽ tự động được chuyển về trạng thái <strong>Trống</strong> để sẵn sàng cho khách mới thuê.
+              </p>
+            </div>
           </DialogDescription>
         </DialogHeader>
 

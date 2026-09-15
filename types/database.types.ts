@@ -173,24 +173,54 @@ export type Database = {
       };
       organizations: {
         Row: {
+          address: string | null;
+          bank_account_name: string | null;
+          bank_account_no: string | null;
+          bank_id: string | null;
           created_at: string;
+          default_electricity_price: number | null;
+          default_water_price: number | null;
           id: string;
+          invoice_notes: string | null;
           name: string;
+          phone: string | null;
+          show_qr_invoice: boolean;
           slug: string | null;
+          transfer_template: string | null;
           updated_at: string;
         };
         Insert: {
+          address?: string | null;
+          bank_account_name?: string | null;
+          bank_account_no?: string | null;
+          bank_id?: string | null;
           created_at?: string;
+          default_electricity_price?: number | null;
+          default_water_price?: number | null;
           id?: string;
+          invoice_notes?: string | null;
           name: string;
+          phone?: string | null;
+          show_qr_invoice?: boolean;
           slug?: string | null;
+          transfer_template?: string | null;
           updated_at?: string;
         };
         Update: {
+          address?: string | null;
+          bank_account_name?: string | null;
+          bank_account_no?: string | null;
+          bank_id?: string | null;
           created_at?: string;
+          default_electricity_price?: number | null;
+          default_water_price?: number | null;
           id?: string;
+          invoice_notes?: string | null;
           name?: string;
+          phone?: string | null;
+          show_qr_invoice?: boolean;
           slug?: string | null;
+          transfer_template?: string | null;
           updated_at?: string;
         };
         Relationships: [];
@@ -410,6 +440,79 @@ export type Database = {
           },
           {
             foreignKeyName: "utility_readings_room_id_fkey";
+            columns: ["room_id"];
+            isOneToOne: false;
+            referencedRelation: "rooms";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      meter_readings: {
+        Row: {
+          consumption: number | null;
+          created_at: string;
+          id: string;
+          invoice_id: string | null;
+          new_value: number;
+          old_value: number;
+          org_id: string;
+          period: string;
+          reading_date: string;
+          room_id: string;
+          total_amount: number;
+          type: "electricity" | "water";
+          unit_price: number;
+          updated_at: string;
+        };
+        Insert: {
+          consumption?: number | null;
+          created_at?: string;
+          id?: string;
+          invoice_id?: string | null;
+          new_value: number;
+          old_value?: number;
+          org_id: string;
+          period: string;
+          reading_date?: string;
+          room_id: string;
+          total_amount?: number;
+          type: "electricity" | "water";
+          unit_price?: number;
+          updated_at?: string;
+        };
+        Update: {
+          consumption?: number | null;
+          created_at?: string;
+          id?: string;
+          invoice_id?: string | null;
+          new_value?: number;
+          old_value?: number;
+          org_id?: string;
+          period?: string;
+          reading_date?: string;
+          room_id?: string;
+          total_amount?: number;
+          type?: "electricity" | "water";
+          unit_price?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "meter_readings_invoice_id_fkey";
+            columns: ["invoice_id"];
+            isOneToOne: false;
+            referencedRelation: "invoices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meter_readings_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meter_readings_room_id_fkey";
             columns: ["room_id"];
             isOneToOne: false;
             referencedRelation: "rooms";

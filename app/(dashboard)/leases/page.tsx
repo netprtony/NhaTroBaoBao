@@ -44,7 +44,7 @@ export default async function LeasesPage() {
       leases = leasesData as unknown as LeaseWithDetails[]
     }
 
-    // 2. Fetch danh sách phòng để chọn trong dialog tạo hợp đồng
+    // 2. Fetch danh sách phòng CÒN TRỐNG của tổ chức để chọn khi tạo hợp đồng
     const { data: roomsData } = await supabase
       .from("rooms")
       .select(`
@@ -56,6 +56,8 @@ export default async function LeasesPage() {
           name
         )
       `)
+      .eq("org_id", profile.org_id)
+      .eq("status", "available")
       .order("room_code", { ascending: true })
 
     if (roomsData) {
@@ -71,14 +73,26 @@ export default async function LeasesPage() {
       })
     }
 
-    // 3. Fetch danh sách khách thuê
+    // 3. Fetch danh sách khách thuê CHƯA CÓ HỢP ĐỒNG ĐANG HOẠT ĐỘNG của tổ chức
+    // Lấy danh sách tenant_id đang đứng tên hợp đồng active
+    const { data: activeLeasesData } = await supabase
+      .from("leases")
+      .select("tenant_id")
+      .eq("org_id", profile.org_id)
+      .eq("status", "active")
+
+    const activeTenantIds = new Set((activeLeasesData || []).map((l) => l.tenant_id))
+
+    // Lấy toàn bộ khách thuê của tổ chức
     const { data: tenantsData } = await supabase
       .from("tenants")
       .select("id, full_name, phone")
+      .eq("org_id", profile.org_id)
       .order("full_name", { ascending: true })
 
     if (tenantsData) {
-      selectableTenants = tenantsData
+      // Chỉ load những khách thuê chưa có hợp đồng active nào (kể cả khách chưa từng có hợp đồng hoặc khách đã thanh lý hợp đồng)
+      selectableTenants = tenantsData.filter((t) => !activeTenantIds.has(t.id))
     }
   }
 

@@ -94,13 +94,24 @@ export function LeaseFormDialog({ rooms, tenants, trigger }: LeaseFormDialogProp
         <form action={formAction} className="space-y-4 pt-2">
           {/* Chọn phòng */}
           <div className="space-y-2">
-            <Label htmlFor="roomId">
-              Phòng thuê <span className="text-red-500">*</span>
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="roomId">
+                Phòng thuê <span className="text-red-500">*</span>
+              </Label>
+              <span className="text-xs">
+                {rooms.length > 0 ? (
+                  <span className="text-blue-600 font-medium">({rooms.length} phòng trống khả dụng)</span>
+                ) : (
+                  <span className="text-amber-600 font-medium">(Hết phòng trống)</span>
+                )}
+              </span>
+            </div>
             <input type="hidden" name="roomId" value={selectedRoomId} />
-            <Select value={selectedRoomId} onValueChange={handleRoomChange}>
+            <Select value={selectedRoomId} onValueChange={handleRoomChange} disabled={rooms.length === 0}>
               <SelectTrigger>
-                <SelectValue placeholder="-- Chọn phòng còn trống --" />
+                <SelectValue
+                  placeholder={rooms.length === 0 ? "-- Hết phòng trống --" : "-- Chọn phòng còn trống --"}
+                />
               </SelectTrigger>
               <SelectContent>
                 {rooms.length === 0 ? (
@@ -111,28 +122,43 @@ export function LeaseFormDialog({ rooms, tenants, trigger }: LeaseFormDialogProp
                   rooms.map((room) => (
                     <SelectItem key={room.id} value={room.id}>
                       {room.propertyName} - P.{room.room_code} ({new Intl.NumberFormat("vi-VN").format(room.base_price)} đ/tháng)
-                      {room.status !== "available" ? " (Đang có khách)" : " (Trống)"}
                     </SelectItem>
                   ))
                 )}
               </SelectContent>
             </Select>
+            {rooms.length === 0 && (
+              <p className="text-xs text-amber-600">
+                Toàn bộ các phòng hiện đã có khách thuê hoặc đang bảo trì. Vui lòng thêm phòng mới hoặc kiểm tra lại trạng thái phòng.
+              </p>
+            )}
           </div>
 
           {/* Chọn khách thuê */}
           <div className="space-y-2">
-            <Label htmlFor="tenantId">
-              Khách thuê đại diện <span className="text-red-500">*</span>
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="tenantId">
+                Khách thuê đại diện <span className="text-red-500">*</span>
+              </Label>
+              <span className="text-xs">
+                {tenants.length > 0 ? (
+                  <span className="text-blue-600 font-medium">({tenants.length} khách thuê sẵn sàng)</span>
+                ) : (
+                  <span className="text-amber-600 font-medium">(Không có khách thuê khả dụng)</span>
+                )}
+              </span>
+            </div>
             <input type="hidden" name="tenantId" value={selectedTenantId} />
-            <Select value={selectedTenantId} onValueChange={setSelectedTenantId}>
+            <Select value={selectedTenantId} onValueChange={setSelectedTenantId} disabled={tenants.length === 0}>
               <SelectTrigger>
-                <SelectValue placeholder="-- Chọn khách thuê --" />
+                <SelectValue
+                  placeholder={tenants.length === 0 ? "-- Không có khách khả dụng --" : "-- Chọn khách thuê --"}
+                />
               </SelectTrigger>
               <SelectContent>
                 {tenants.length === 0 ? (
                   <SelectItem value="none" disabled>
-                    Chưa có khách thuê nào (Vui lòng thêm khách thuê trước)
+                    Chưa có khách thuê khả dụng
                   </SelectItem>
                 ) : (
                   tenants.map((tenant) => (
@@ -143,6 +169,11 @@ export function LeaseFormDialog({ rooms, tenants, trigger }: LeaseFormDialogProp
                 )}
               </SelectContent>
             </Select>
+            {tenants.length === 0 && (
+              <p className="text-xs text-amber-600">
+                Tất cả khách thuê hiện tại đều đang đứng tên hợp đồng hiệu lực. Vui lòng thêm khách thuê mới trước khi tạo hợp đồng.
+              </p>
+            )}
           </div>
 
           {/* Ngày bắt đầu & kết thúc */}
@@ -257,11 +288,17 @@ export function LeaseFormDialog({ rooms, tenants, trigger }: LeaseFormDialogProp
             </Button>
             <Button
               type="submit"
-              disabled={isPending || !selectedRoomId || !selectedTenantId}
-              className="bg-blue-600 hover:bg-blue-700"
+              disabled={isPending || !selectedRoomId || !selectedTenantId || rooms.length === 0 || tenants.length === 0}
+              className="bg-blue-600 hover:bg-blue-700 min-w-[140px]"
             >
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isPending ? "Đang tạo hợp đồng..." : "Tạo hợp đồng"}
+              {isPending
+                ? "Đang tạo hợp đồng..."
+                : rooms.length === 0
+                ? "Hết phòng trống"
+                : tenants.length === 0
+                ? "Không có khách khả dụng"
+                : "Tạo hợp đồng"}
             </Button>
           </div>
         </form>

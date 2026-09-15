@@ -33,6 +33,46 @@ export async function createLease(prevState: ActionState, formData: FormData) {
       return { error: "Vui lòng nhập giá thuê hàng tháng hợp lệ." }
     }
 
+    // 1. Kiểm tra phòng có thuộc tổ chức và đang còn trống (available) không
+    const { data: roomData, error: roomError } = await supabase
+      .from("rooms")
+      .select("id, status")
+      .eq("id", roomId)
+      .eq("org_id", profile.org_id)
+      .single()
+
+    if (roomError || !roomData) {
+      return { error: "Không tìm thấy thông tin phòng hoặc phòng không thuộc quyền quản lý của bạn." }
+    }
+
+    if (roomData.status !== "available") {
+      return { error: "Phòng này hiện không còn trống (đang có khách thuê hoặc đang bảo trì)." }
+    }
+
+    // 2. Kiểm tra khách thuê có thuộc tổ chức và chưa có hợp đồng active nào không
+    const { data: tenantData, error: tenantError } = await supabase
+      .from("tenants")
+      .select("id")
+      .eq("id", tenantId)
+      .eq("org_id", profile.org_id)
+      .single()
+
+    if (tenantError || !tenantData) {
+      return { error: "Không tìm thấy thông tin khách thuê trong tổ chức của bạn." }
+    }
+
+    const { data: existingActiveLease } = await supabase
+      .from("leases")
+      .select("id")
+      .eq("org_id", profile.org_id)
+      .eq("tenant_id", tenantId)
+      .eq("status", "active")
+      .maybeSingle()
+
+    if (existingActiveLease) {
+      return { error: "Khách thuê này hiện đang đứng tên hợp đồng thuê hiệu lực. Không thể tạo thêm hợp đồng mới." }
+    }
+
     let contractFilePath: string | null = null
 
     // Xử lý upload file hợp đồng nếu có

@@ -16,8 +16,8 @@ const navItems = [
   { name: "Nhà trọ", href: "/properties", icon: Building2, disabled: false },
   { name: "Khách thuê", href: "/tenants", icon: Users, disabled: false },
   { name: "Hợp đồng", href: "/leases", icon: FileText, disabled: false },
-  { name: "Hóa đơn", href: "/invoices", icon: Receipt, disabled: true },
-  { name: "Cài đặt", href: "/settings", icon: Settings, disabled: true },
+  { name: "Hóa đơn", href: "/invoices", icon: Receipt, disabled: false },
+  { name: "Cài đặt", href: "/settings", icon: Settings, disabled: false },
 ]
 
 export function Sidebar({ orgName, userName, userRole }: SidebarProps) {

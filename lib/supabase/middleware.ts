@@ -39,12 +39,51 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  // Protect /admin routes (Superadmin only)
+  if (pathname.startsWith("/admin")) {
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("redirectTo", pathname);
+      return NextResponse.redirect(url);
+    }
+
+    // Verify platform admin status
+    const { data: admin } = await supabase
+      .from("platform_admins")
+      .select("id")
+      .eq("id", user.id)
+      .single();
+
+    if (!admin) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
+  }
+
   // Protect /dashboard routes
   if (!user && pathname.startsWith("/dashboard")) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(url);
+  }
+
+  // Check if authenticated user's organization is suspended
+  if (user && pathname.startsWith("/dashboard")) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("org_id, organizations(is_suspended)")
+      .eq("id", user.id)
+      .single();
+
+    const org = profile?.organizations as unknown as { is_suspended?: boolean } | null;
+    if (org?.is_suspended) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/suspended";
+      return NextResponse.redirect(url);
+    }
   }
 
   // Protect /portal routes

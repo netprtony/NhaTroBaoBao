@@ -260,10 +260,13 @@ export type Database = {
           default_water_price: number | null
           id: string
           invoice_notes: string | null
+          is_suspended: boolean
           name: string
           phone: string | null
           show_qr_invoice: boolean | null
           slug: string | null
+          suspended_at: string | null
+          suspension_reason: string | null
           transfer_template: string | null
           updated_at: string
         }
@@ -277,10 +280,13 @@ export type Database = {
           default_water_price?: number | null
           id?: string
           invoice_notes?: string | null
+          is_suspended?: boolean
           name: string
           phone?: string | null
           show_qr_invoice?: boolean | null
           slug?: string | null
+          suspended_at?: string | null
+          suspension_reason?: string | null
           transfer_template?: string | null
           updated_at?: string
         }
@@ -294,12 +300,33 @@ export type Database = {
           default_water_price?: number | null
           id?: string
           invoice_notes?: string | null
+          is_suspended?: boolean
           name?: string
           phone?: string | null
           show_qr_invoice?: boolean | null
           slug?: string | null
+          suspended_at?: string | null
+          suspension_reason?: string | null
           transfer_template?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      platform_admins: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
         }
         Relationships: []
       }

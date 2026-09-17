@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table"
 import { TenantFormDialog } from "@/components/tenants/tenant-form-dialog"
 import { DeleteTenantDialog } from "@/components/tenants/delete-tenant-dialog"
+import { TenantPortalDialog } from "@/components/tenants/tenant-portal-dialog"
 import { Tables } from "@/types/database.types"
 
 export type ActiveLeaseInfo = {
@@ -235,6 +236,7 @@ export function TenantsClient({ tenants }: { tenants: TenantWithLease[] }) {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <TenantPortalDialog tenant={tenant} />
                         <TenantFormDialog
                           tenant={tenant}
                           trigger={

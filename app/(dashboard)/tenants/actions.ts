@@ -85,29 +85,34 @@ export async function updateTenant(prevState: ActionState, formData: FormData) {
   }
 }
 
+export async function checkDeleteTenant(id: string) {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase.rpc("can_delete_tenant", { p_tenant_id: id })
+    
+    if (error) {
+      return { error: error.message }
+    }
+    
+    return { data }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định."
+    return { error: message }
+  }
+}
+
 export async function deleteTenant(id: string) {
   try {
     const supabase = await createClient()
 
-    // Kiểm tra xem khách thuê có hợp đồng active không
-    const { data: activeLeases, error: leaseError } = await supabase
-      .from("leases")
-      .select("id")
-      .eq("tenant_id", id)
-      .eq("status", "active")
-      .limit(1)
-
-    if (leaseError) {
-      return { error: leaseError.message }
+    const { data: checkData, error: checkError } = await supabase.rpc("can_delete_tenant", { p_tenant_id: id })
+    if (checkError) return { error: checkError.message }
+    const checkResult = checkData as { allowed?: boolean; reason?: string }
+    if (checkResult && checkResult.allowed === false) {
+      return { error: checkResult.reason || "Không thể xóa khách thuê này." }
     }
 
-    if (activeLeases && activeLeases.length > 0) {
-      return {
-        error: "Không thể xóa khách đang có hợp đồng hiệu lực! Vui lòng thanh lý hợp đồng trước.",
-      }
-    }
-
-    const { error } = await supabase.from("tenants").delete().eq("id", id)
+    const { error } = await supabase.from("tenants").update({ deleted_at: new Date().toISOString() }).eq("id", id)
 
     if (error) {
       return { error: error.message }
@@ -120,3 +125,49 @@ export async function deleteTenant(id: string) {
     return { error: message }
   }
 }
+
+export async function toggleTenantPortalAccess(prevState: ActionState, formData: FormData) {
+  try {
+    const supabase = await createClient()
+
+    const tenantId = formData.get("tenantId") as string
+    const actionType = formData.get("actionType") as string // "enable" | "disable" | "resetPassword"
+    const password = (formData.get("password") as string)?.trim()
+
+    if (!tenantId) {
+      return { error: "Không tìm thấy thông tin khách thuê." }
+    }
+
+    if (actionType === "disable") {
+      const { error: updateErr } = await supabase
+        .from("tenants")
+        .update({ portal_enabled: false })
+        .eq("id", tenantId)
+
+      if (updateErr) return { error: updateErr.message }
+      revalidatePath("/tenants")
+      return { success: true }
+    }
+
+    if ((actionType === "enable" || actionType === "resetPassword") && password && password.length < 6) {
+      return { error: "Mật khẩu khởi tạo phải có ít nhất 6 ký tự." }
+    }
+
+    // Call the secure RPC to create the auth user or update password
+    const { error: rpcError } = await (supabase as any).rpc("admin_set_tenant_credentials", {
+      p_tenant_id: tenantId,
+      p_password: password || "", // if empty, the RPC might still set it but we should require it
+    })
+
+    if (rpcError) {
+      return { error: `Lỗi cấu hình tài khoản: ${rpcError.message}` }
+    }
+
+    revalidatePath("/tenants")
+    return { success: true }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định."
+    return { error: message }
+  }
+}
+

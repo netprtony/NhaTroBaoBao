@@ -2,7 +2,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Building2, Users, FileText, Receipt, Settings, LogOut } from "lucide-react"
+import { LayoutDashboard, Building2, Users, FileText, Receipt, Zap, Settings, LogOut } from "lucide-react"
 import { logout } from "@/app/(auth)/actions"
 
 interface SidebarProps {
@@ -16,6 +16,7 @@ const navItems = [
   { name: "Nhà trọ", href: "/properties", icon: Building2, disabled: false },
   { name: "Khách thuê", href: "/tenants", icon: Users, disabled: false },
   { name: "Hợp đồng", href: "/leases", icon: FileText, disabled: false },
+  { name: "Điện & Nước", href: "/utility-readings", icon: Zap, disabled: false },
   { name: "Hóa đơn", href: "/invoices", icon: Receipt, disabled: false },
   { name: "Cài đặt", href: "/settings", icon: Settings, disabled: false },
 ]

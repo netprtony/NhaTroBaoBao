@@ -47,10 +47,24 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Protect /portal routes
+  if (!user && pathname.startsWith("/portal") && pathname !== "/portal/login") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/portal/login";
+    url.searchParams.set("redirectTo", pathname);
+    return NextResponse.redirect(url);
+  }
+
   // Redirect authenticated user away from auth pages
   if (user && (pathname === "/login" || pathname === "/register")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
+  if (user && pathname === "/portal/login") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/portal/dashboard";
     return NextResponse.redirect(url);
   }
 

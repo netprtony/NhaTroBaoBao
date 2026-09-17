@@ -78,11 +78,34 @@ export async function updateRoom(prevState: ActionState, formData: FormData) {
   }
 }
 
+export async function checkDeleteRoom(id: string) {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase.rpc("can_delete_room", { p_room_id: id })
+    
+    if (error) {
+      return { error: error.message }
+    }
+    
+    return { data }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Đã xảy ra lỗi"
+    return { error: message }
+  }
+}
+
 export async function deleteRoom(id: string, propertyId: string) {
   try {
     const supabase = await createClient()
     
-    const { error } = await supabase.from("rooms").delete().eq("id", id)
+    const { data: checkData, error: checkError } = await supabase.rpc("can_delete_room", { p_room_id: id })
+    if (checkError) return { error: checkError.message }
+    const checkResult = checkData as { allowed?: boolean; reason?: string }
+    if (checkResult && checkResult.allowed === false) {
+      return { error: checkResult.reason || "Không thể xóa phòng này" }
+    }
+    
+    const { error } = await supabase.from("rooms").update({ deleted_at: new Date().toISOString() }).eq("id", id)
 
     if (error) {
       return { error: error.message }

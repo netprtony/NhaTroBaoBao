@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { RoomFormDialog } from "@/components/rooms/room-form-dialog"
 import { DeleteRoomDialog } from "@/components/rooms/delete-room-dialog"
+import { RoomReadingsDialog } from "@/components/rooms/room-readings-dialog"
 import { Tables } from "@/types/database.types"
 
 type RoomCardProps = {
@@ -47,6 +48,7 @@ export function RoomCard({ room }: RoomCardProps) {
         </div>
       </CardContent>
       <CardFooter className="flex justify-end gap-2 border-t pt-4">
+        <RoomReadingsDialog roomId={room.id} roomCode={room.room_code} />
         <RoomFormDialog
           propertyId={room.property_id || ""}
           room={room}

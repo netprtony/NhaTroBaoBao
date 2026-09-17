@@ -52,8 +52,18 @@ export default async function InvoicesPage() {
         label,
         amount
       ),
+      meter_readings (
+        id,
+        type,
+        old_value,
+        new_value,
+        consumption,
+        unit_price,
+        total_amount
+      ),
       lease:leases (
         room:rooms (
+          id,
           room_code,
           property:properties (
             name,
@@ -128,10 +138,30 @@ export default async function InvoicesPage() {
     console.error("Lỗi tải danh sách chỉ số điện nước:", meterError)
   }
 
-  // Ép kiểu dữ liệu an toàn
-  const invoices = (invoicesData || []) as unknown as InvoicePreviewData[]
+  // Ép kiểu dữ liệu an toàn & ghép meter_readings
+  const rawInvoices = invoicesData || []
+  const rawReadings = meterReadingsData || []
+
+  const invoices = rawInvoices.map((inv: any) => {
+    let readings = inv.meter_readings || []
+    if ((!readings || readings.length === 0) && inv.lease?.room?.id && inv.period) {
+      const roomId = inv.lease.room.id
+      const period = inv.period
+      const matched = rawReadings.filter(
+        (m: any) => m.room_id === roomId && m.period === period
+      )
+      if (matched.length > 0) {
+        readings = matched
+      }
+    }
+    return {
+      ...inv,
+      meter_readings: readings,
+    }
+  }) as unknown as InvoicePreviewData[]
+
   const activeLeases = (activeLeasesData || []) as unknown as ActiveLeaseOption[]
-  const meterReadings = (meterReadingsData || []) as unknown as import("@/components/invoices/meter-readings-table").MeterReadingDisplayItem[]
+  const meterReadings = rawReadings as unknown as import("@/components/invoices/meter-readings-table").MeterReadingDisplayItem[]
 
   return (
     <InvoicesClient

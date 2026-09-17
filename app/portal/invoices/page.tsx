@@ -69,7 +69,7 @@ export default async function PortalInvoicesPage() {
   if (leaseIds.length > 0) {
     const { data: invoiceData } = await supabase
       .from("invoices")
-      .select("*, invoice_items(*), lease:leases(*, room:rooms(*, property:properties(*)), tenant:tenants(*))")
+      .select("*, invoice_items(*), meter_readings(*), lease:leases(*, room:rooms(*, property:properties(*)), tenant:tenants(*))")
       .in("lease_id", leaseIds)
       .order("period", { ascending: false })
 

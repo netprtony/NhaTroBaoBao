@@ -50,6 +50,15 @@ export type InvoicePreviewData = {
     label: string
     amount: number
   }>
+  meter_readings?: Array<{
+    id?: string
+    type: "electricity" | "water" | string
+    old_value: number
+    new_value: number
+    consumption?: number | null
+    unit_price: number
+    total_amount: number
+  }>
 }
 
 export type OrgPaymentConfig = {
@@ -184,6 +193,9 @@ export function InvoicePreviewDialog({
   const propertyAddress = invoice.lease?.room?.property?.address || ""
   const tenantName = invoice.lease?.tenant?.full_name || "Khách thuê"
   const tenantPhone = invoice.lease?.tenant?.phone || ""
+
+  const elecReading = invoice.meter_readings?.find((r) => r.type === "electricity")
+  const waterReading = invoice.meter_readings?.find((r) => r.type === "water")
 
   // Mẫu cú pháp nội dung chuyển khoản
   const transferContent = paymentConfig?.transfer_template
@@ -487,20 +499,28 @@ export function InvoicePreviewDialog({
 
             {/* Bảng kê chi tiết */}
             <div className="border rounded-md overflow-hidden mb-4">
-              <table className="w-full text-xs text-left">
+              <table className="w-full text-xs text-left border-collapse">
                 <thead className="bg-slate-100 text-slate-600 font-semibold uppercase text-[10px]">
                   <tr>
-                    <th className="py-2 px-3">Khoản mục</th>
-                    <th className="py-2 px-3 text-right">Thành tiền</th>
+                    <th className="py-2.5 px-3">Khoản mục thanh toán</th>
+                    <th className="py-2.5 px-3 text-center">Chỉ số (Cũ ➔ Mới) / Số lượng</th>
+                    <th className="py-2.5 px-3 text-right">Đơn giá</th>
+                    <th className="py-2.5 px-3 text-right">Thành tiền</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {/* Tiền phòng */}
                   <tr>
-                    <td className="py-2 px-3 font-medium text-slate-800">
+                    <td className="py-2.5 px-3 font-semibold text-slate-900">
                       1. Tiền thuê phòng
                     </td>
-                    <td className="py-2 px-3 text-right font-semibold text-slate-900">
+                    <td className="py-2.5 px-3 text-center text-slate-500 font-mono text-[11px]">
+                      1 tháng
+                    </td>
+                    <td className="py-2.5 px-3 text-right text-slate-600 font-mono text-[11px]">
+                      {formatVND(invoice.rent_amount)}
+                    </td>
+                    <td className="py-2.5 px-3 text-right font-bold text-slate-900">
                       {formatVND(invoice.rent_amount)}
                     </td>
                   </tr>
@@ -508,10 +528,27 @@ export function InvoicePreviewDialog({
                   {/* Tiền điện */}
                   {invoice.electricity_amount > 0 && (
                     <tr>
-                      <td className="py-2 px-3 text-slate-800">
+                      <td className="py-2.5 px-3 text-slate-900 font-medium">
                         2. Tiền điện sinh hoạt
                       </td>
-                      <td className="py-2 px-3 text-right font-semibold text-slate-900">
+                      <td className="py-2.5 px-3 text-center font-mono text-[11px]">
+                        {elecReading ? (
+                          <div className="space-y-0.5">
+                            <span className="inline-block bg-amber-50 text-amber-900 border border-amber-200/80 px-1.5 py-0.5 rounded text-[10px] font-semibold">
+                              {elecReading.old_value.toLocaleString("vi-VN")} ➔ {elecReading.new_value.toLocaleString("vi-VN")}
+                            </span>
+                            <div className="text-[10px] text-amber-700 font-bold">
+                              (= {(elecReading.consumption ?? Math.max(0, elecReading.new_value - elecReading.old_value)).toLocaleString("vi-VN")} kWh)
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400">---</span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3 text-right text-slate-600 font-mono text-[11px]">
+                        {elecReading ? `${formatVND(elecReading.unit_price)}/kWh` : "---"}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-bold text-slate-900">
                         {formatVND(invoice.electricity_amount)}
                       </td>
                     </tr>
@@ -520,10 +557,27 @@ export function InvoicePreviewDialog({
                   {/* Tiền nước */}
                   {invoice.water_amount > 0 && (
                     <tr>
-                      <td className="py-2 px-3 text-slate-800">
+                      <td className="py-2.5 px-3 text-slate-900 font-medium">
                         3. Tiền nước sinh hoạt
                       </td>
-                      <td className="py-2 px-3 text-right font-semibold text-slate-900">
+                      <td className="py-2.5 px-3 text-center font-mono text-[11px]">
+                        {waterReading ? (
+                          <div className="space-y-0.5">
+                            <span className="inline-block bg-cyan-50 text-cyan-900 border border-cyan-200/80 px-1.5 py-0.5 rounded text-[10px] font-semibold">
+                              {waterReading.old_value.toLocaleString("vi-VN")} ➔ {waterReading.new_value.toLocaleString("vi-VN")}
+                            </span>
+                            <div className="text-[10px] text-cyan-700 font-bold">
+                              (= {(waterReading.consumption ?? Math.max(0, waterReading.new_value - waterReading.old_value)).toLocaleString("vi-VN")} m³)
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400">---</span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3 text-right text-slate-600 font-mono text-[11px]">
+                        {waterReading ? `${formatVND(waterReading.unit_price)}/m³` : "---"}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-bold text-slate-900">
                         {formatVND(invoice.water_amount)}
                       </td>
                     </tr>
@@ -533,8 +587,14 @@ export function InvoicePreviewDialog({
                   {invoice.invoice_items && invoice.invoice_items.length > 0 && (
                     invoice.invoice_items.map((item, idx) => (
                       <tr key={idx}>
-                        <td className="py-2 px-3 text-slate-700 pl-5">
+                        <td className="py-2 px-3 text-slate-700 pl-4">
                           • {item.label}
+                        </td>
+                        <td className="py-2 px-3 text-center text-slate-400 text-[11px]">
+                          1 tháng
+                        </td>
+                        <td className="py-2 px-3 text-right text-slate-600 font-mono text-[11px]">
+                          {formatVND(item.amount)}
                         </td>
                         <td className="py-2 px-3 text-right font-medium text-slate-800">
                           {formatVND(item.amount)}
@@ -545,7 +605,7 @@ export function InvoicePreviewDialog({
                 </tbody>
                 <tfoot className="bg-blue-50/50 border-t border-slate-200">
                   <tr>
-                    <td className="py-2.5 px-3 font-bold text-slate-900 text-xs">
+                    <td colSpan={3} className="py-2.5 px-3 font-bold text-slate-900 text-xs">
                       TỔNG CỘNG THANH TOÁN
                     </td>
                     <td className="py-2.5 px-3 text-right font-extrabold text-blue-700 text-sm">

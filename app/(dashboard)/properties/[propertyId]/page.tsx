@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { PropertyDetailClient } from "./property-detail-client"
+import { getOrgPlanUsage } from "@/lib/subscription/check-limit"
 
 export const metadata = { title: "Chi tiết nhà trọ - BaoBao Stay" }
 
@@ -19,6 +20,8 @@ export default async function PropertyDetailPage({ params }: Props) {
     notFound()
   }
 
+  const usage = await getOrgPlanUsage(profile.org_id)
+
   const { data: property } = await supabase
     .from("properties")
     .select("*")
@@ -35,5 +38,5 @@ export default async function PropertyDetailPage({ params }: Props) {
     .eq("property_id", propertyId)
     .order("room_code")
 
-  return <PropertyDetailClient property={property} rooms={rooms || []} />
+  return <PropertyDetailClient property={property} rooms={rooms || []} usage={usage} />
 }

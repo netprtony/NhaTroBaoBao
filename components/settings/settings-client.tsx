@@ -28,6 +28,8 @@ import {
   updateDefaultRates,
   updateProfileSettings,
 } from "@/app/(dashboard)/settings/actions"
+import { BackupRestoreCard } from "./backup-restore-card"
+import { CheckoutDialog } from "./checkout-dialog"
 import { Tables } from "@/types/database.types"
 
 export const VIETNAM_BANKS = [
@@ -57,13 +59,16 @@ export const VIETNAM_BANKS = [
   { id: "TIMO", name: "Timo by BVBank" },
 ]
 
+import { type PlanUsageInfo } from "@/lib/subscription/check-limit"
+
 interface SettingsClientProps {
   organization: Tables<"organizations">
   profile: Tables<"profiles">
   userEmail: string
+  usage?: PlanUsageInfo | null
 }
 
-export function SettingsClient({ organization, profile, userEmail }: SettingsClientProps) {
+export function SettingsClient({ organization, profile, userEmail, usage }: SettingsClientProps) {
   const [activeTab, setActiveTab] = useState("payment")
 
   // State cho Form thanh toán & VietQR
@@ -570,80 +575,238 @@ export function SettingsClient({ organization, profile, userEmail }: SettingsCli
         </TabsContent>
 
         {/* TAB 5: GÓI DỊCH VỤ SAAS */}
-        <TabsContent value="subscription">
-          <Card className="shadow-sm border bg-white max-w-2xl">
+        <TabsContent value="subscription" className="space-y-6">
+          {/* Thẻ trạng thái hiện tại */}
+          <Card className="shadow-sm border bg-white">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <CardTitle className="text-base font-bold flex items-center gap-2">
-                    <Crown className="h-4 w-4 text-amber-500" />
-                    Gói dịch vụ BaoBao Stay SaaS
+                    <Crown className="h-5 w-5 text-amber-500" />
+                    Gói dịch vụ hiện tại: <span className="uppercase text-blue-600">{usage?.plan || organization.plan || "free"}</span>
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    Thông tin gói đăng ký và các tính năng mở rộng của nền tảng quản lý nhà trọ.
+                    Thông tin gói đăng ký, hạn mức tài nguyên và trạng thái gia hạn.
                   </CardDescription>
                 </div>
-                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
-                  Gói Chuyên Nghiệp (Pro)
+                <Badge
+                  className={cn(
+                    "uppercase self-start sm:self-auto",
+                    usage?.isReadOnly
+                      ? "bg-red-600 text-white"
+                      : usage?.plan === "vip"
+                      ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white"
+                      : usage?.plan === "basic"
+                      ? "bg-blue-600 text-white"
+                      : "bg-slate-600 text-white"
+                  )}
+                >
+                  {usage?.isReadOnly
+                    ? "Tài khoản tạm khóa ghi (Chỉ đọc)"
+                    : `Trạng thái: ${usage?.planStatus || "active"}`}
                 </Badge>
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-5">
-              <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 flex items-start gap-3">
-                <Sparkles className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-                <div className="text-xs space-y-1">
-                  <strong className="text-blue-900 font-bold text-sm block">
-                    Đầy đủ quyền năng quản lý nhà trọ không giới hạn
-                  </strong>
-                  <p className="text-blue-700">
-                    Tài khoản của bạn đã được kích hoạt trọn gói toàn bộ các tính năng: Quản lý không giới hạn số cơ sở nhà trọ, lập hóa đơn tự động, thanh toán VietQR động, và quản lý chỉ số điện nước.
-                  </p>
+            <CardContent className="space-y-4">
+              {/* Thống kê hạn mức */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3 rounded-lg bg-slate-50 border space-y-1">
+                  <span className="text-[11px] text-slate-500 font-medium">Nhà trọ đã dùng</span>
+                  <div className="text-lg font-bold text-slate-900">
+                    {usage?.propertiesCount || 0} / {usage?.maxProperties ?? "Không giới hạn"}
+                  </div>
+                  {usage?.isAtPropertyLimit && (
+                    <span className="text-[10px] text-amber-600 font-semibold block">Đã đạt hạn mức</span>
+                  )}
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Quyền lợi của tài khoản
-                </h4>
+                <div className="p-3 rounded-lg bg-slate-50 border space-y-1">
+                  <span className="text-[11px] text-slate-500 font-medium">Phòng trọ đã dùng</span>
+                  <div className="text-lg font-bold text-slate-900">
+                    {usage?.roomsCount || 0} / {usage?.maxRooms ?? "Không giới hạn"}
+                  </div>
+                  {usage?.isAtRoomLimit && (
+                    <span className="text-[10px] text-amber-600 font-semibold block">Đã đạt hạn mức</span>
+                  )}
+                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 border">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                    <span>Quản lý không giới hạn nhà trọ</span>
+                <div className="p-3 rounded-lg bg-slate-50 border space-y-1">
+                  <span className="text-[11px] text-slate-500 font-medium">Cổng khách thuê</span>
+                  <div className="text-lg font-bold text-slate-900">
+                    {usage?.tenantPortalEnabled ? "Đã bật ✅" : "Chưa hỗ trợ ❌"}
                   </div>
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 border">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                    <span>Quản lý không giới hạn số phòng</span>
-                  </div>
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 border">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                    <span>Xuất hóa đơn PDF & Ảnh Zalo sắc nét</span>
-                  </div>
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 border">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                    <span>VietQR động chuẩn NAPAS 247</span>
-                  </div>
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 border">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                    <span>Lưu trữ chỉ số điện nước kế thừa</span>
-                  </div>
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 border">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                    <span>Bảo mật Row-Level Security đa tổ chức</span>
-                  </div>
+                  <span className="text-[10px] text-slate-400 block">Dành cho khách xem hóa đơn</span>
                 </div>
               </div>
             </CardContent>
-
-            <CardFooter className="border-t pt-4 bg-slate-50/50 flex justify-between items-center text-xs text-slate-500">
-              <span>Phiên bản phần mềm: BaoBao Stay v1.2.0</span>
-              <span className="text-emerald-600 font-semibold flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                Hệ thống hoạt động ổn định
-              </span>
-            </CardFooter>
           </Card>
+
+          {/* Bảng so sánh 3 gói Free, Basic, VIP */}
+          <div>
+            <h3 className="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-blue-600" />
+              Bảng so sánh các gói đăng ký BaoBao Stay
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Gói FREE */}
+              <Card className={cn("border relative flex flex-col justify-between", usage?.plan === "free" && "border-blue-500 shadow-md")}>
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-lg font-bold">FREE</CardTitle>
+                    {usage?.plan === "free" && (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                        Đang dùng
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-2xl font-extrabold text-slate-900 mt-2">
+                    0đ <span className="text-xs font-normal text-slate-500">/ trọn đời</span>
+                  </div>
+                  <CardDescription className="text-xs mt-1">
+                    Dành cho chủ trọ quy mô nhỏ (tối đa 1 nhà trọ, 10 phòng), lưu trữ trên cloud.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2 text-xs text-slate-700">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Tối đa <strong>1 nhà trọ</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Tối đa <strong>10 phòng</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Xuất hóa đơn PDF</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <span className="h-4 w-4 text-center">✕</span>
+                    <span>Cổng thông tin khách thuê</span>
+                  </div>
+                </CardContent>
+                <CardFooter className="pt-4 border-t">
+                  <Button variant="outline" className="w-full text-xs" disabled={usage?.plan === "free"}>
+                    {usage?.plan === "free" ? "Gói hiện tại" : "Miễn phí"}
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              {/* Gói BASIC */}
+              <Card className={cn("border relative flex flex-col justify-between", usage?.plan === "basic" ? "border-blue-600 shadow-md ring-2 ring-blue-500/20" : "border-slate-200")}>
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-lg font-bold text-blue-700">BASIC</CardTitle>
+                    {usage?.plan === "basic" ? (
+                      <Badge className="bg-blue-600 text-white">Đang dùng</Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
+                        Phổ biến nhất
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-2xl font-extrabold text-slate-900 mt-2">
+                    99.000đ <span className="text-xs font-normal text-slate-500">/ tháng</span>
+                  </div>
+                  <CardDescription className="text-xs mt-1">
+                    Hoàn hảo cho dãy trọ vừa (tối đa 3 nhà, 30 phòng), đồng bộ dữ liệu Cloud tự động.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2 text-xs text-slate-700">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Tối đa <strong>3 nhà trọ</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Tối đa <strong>30 phòng</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Đồng bộ Cloud đa thiết bị</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Cổng thông tin khách thuê</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>1 Tài khoản nhân viên (Staff)</span>
+                  </div>
+                </CardContent>
+                <CardFooter className="pt-4 border-t">
+                  <CheckoutDialog
+                    initialPlan="basic"
+                    trigger={
+                      <Button className="w-full text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold">
+                        {usage?.plan === "basic" ? "Gia hạn Gói Basic" : "Đăng ký Basic (99k/tháng)"}
+                      </Button>
+                    }
+                  />
+                </CardFooter>
+              </Card>
+
+              {/* Gói VIP */}
+              <Card className={cn("border-2 relative flex flex-col justify-between bg-gradient-to-b from-amber-50/50 to-white", usage?.plan === "vip" ? "border-amber-500 shadow-lg" : "border-amber-300")}>
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-lg font-bold text-amber-700 flex items-center gap-1.5">
+                      <Crown className="h-4 w-4 text-amber-500" /> VIP
+                    </CardTitle>
+                    {usage?.plan === "vip" ? (
+                      <Badge className="bg-amber-600 text-white">Đang dùng</Badge>
+                    ) : (
+                      <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+                        Không giới hạn
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-2xl font-extrabold text-slate-900 mt-2">
+                    249.000đ <span className="text-xs font-normal text-slate-500">/ tháng</span>
+                  </div>
+                  <CardDescription className="text-xs mt-1">
+                    Dành cho hệ thống nhà trọ quy mô lớn, không giới hạn nhà trọ và số phòng.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2 text-xs text-slate-700">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-amber-600 shrink-0" />
+                    <span><strong>Không giới hạn</strong> nhà trọ</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-amber-600 shrink-0" />
+                    <span><strong>Không giới hạn</strong> số phòng</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-amber-600 shrink-0" />
+                    <span><strong>Không giới hạn</strong> nhân viên</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-amber-600 shrink-0" />
+                    <span>Cổng khách thuê + Logo thương hiệu</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-amber-600 shrink-0" />
+                    <span>Thông báo Email + Zalo / SMS</span>
+                  </div>
+                </CardContent>
+                <CardFooter className="pt-4 border-t">
+                  <CheckoutDialog
+                    initialPlan="vip"
+                    trigger={
+                      <Button className="w-full text-xs bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold">
+                        {usage?.plan === "vip" ? "Gia hạn Gói VIP" : "Nâng cấp VIP (249k/tháng)"}
+                      </Button>
+                    }
+                  />
+                </CardFooter>
+              </Card>
+            </div>
+          </div>
+
+          {/* Phần Sao lưu & Khôi phục Dữ liệu thủ công (File JSON & CSV) */}
+          <BackupRestoreCard />
         </TabsContent>
       </Tabs>
     </div>

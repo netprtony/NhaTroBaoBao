@@ -6,13 +6,16 @@ import { Button } from "@/components/ui/button"
 import { RoomFormDialog } from "@/components/rooms/room-form-dialog"
 import { RoomCard } from "@/components/rooms/room-card"
 import { Tables } from "@/types/database.types"
+import { PlanLimitBanner } from "@/components/dashboard/plan-limit-banner"
+import { type PlanUsageInfo } from "@/lib/subscription/check-limit"
 
 type PropertyDetailClientProps = {
   property: Tables<"properties">
   rooms: Tables<"rooms">[]
+  usage?: PlanUsageInfo | null
 }
 
-export function PropertyDetailClient({ property, rooms }: PropertyDetailClientProps) {
+export function PropertyDetailClient({ property, rooms, usage }: PropertyDetailClientProps) {
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center gap-4">
@@ -32,6 +35,8 @@ export function PropertyDetailClient({ property, rooms }: PropertyDetailClientPr
           <p className="text-sm">{property.description}</p>
         </div>
       )}
+
+      {usage && <PlanLimitBanner usage={usage} compact />}
 
       <div className="flex items-center justify-between pt-6 border-t">
         <h2 className="text-2xl font-semibold tracking-tight">Danh sách phòng</h2>

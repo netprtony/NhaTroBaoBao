@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Building2, History, LogOut, ShieldAlert, ShieldCheck } from "lucide-react"
+import { LayoutDashboard, Building2, CreditCard, History, LogOut, ShieldAlert, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { logout } from "@/app/(auth)/actions"
 
@@ -23,6 +23,11 @@ export function AdminSidebar({ adminName }: AdminSidebarProps) {
       title: "Quản lý Tổ chức",
       href: "/admin/organizations",
       icon: Building2,
+    },
+    {
+      title: "Quản lý Đăng ký",
+      href: "/admin/subscriptions",
+      icon: CreditCard,
     },
   ]
 

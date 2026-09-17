@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { PropertiesClient, type PropertyWithCount } from "./properties-client"
+import { getOrgPlanUsage } from "@/lib/subscription/check-limit"
 
 export const metadata = { title: "Nhà trọ - BaoBao Stay" }
 
@@ -10,8 +11,11 @@ export default async function PropertiesPage() {
   const { data: profile } = await supabase.from("profiles").select("org_id").single()
   
   let properties: PropertyWithCount[] = []
+  let usage = null
   
   if (profile?.org_id) {
+    usage = await getOrgPlanUsage(profile.org_id)
+
     const { data } = await supabase
       .from("properties")
       .select("*, rooms(count)")
@@ -22,5 +26,5 @@ export default async function PropertiesPage() {
     }
   }
 
-  return <PropertiesClient properties={properties} />
+  return <PropertiesClient properties={properties} usage={usage} />
 }

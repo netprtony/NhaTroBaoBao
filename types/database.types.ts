@@ -7,8 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -263,6 +261,10 @@ export type Database = {
           is_suspended: boolean
           name: string
           phone: string | null
+          plan: string
+          plan_expires_at: string | null
+          plan_started_at: string
+          plan_status: string
           show_qr_invoice: boolean | null
           slug: string | null
           suspended_at: string | null
@@ -283,6 +285,10 @@ export type Database = {
           is_suspended?: boolean
           name: string
           phone?: string | null
+          plan?: string
+          plan_expires_at?: string | null
+          plan_started_at?: string
+          plan_status?: string
           show_qr_invoice?: boolean | null
           slug?: string | null
           suspended_at?: string | null
@@ -303,12 +309,43 @@ export type Database = {
           is_suspended?: boolean
           name?: string
           phone?: string | null
+          plan?: string
+          plan_expires_at?: string | null
+          plan_started_at?: string
+          plan_status?: string
           show_qr_invoice?: boolean | null
           slug?: string | null
           suspended_at?: string | null
           suspension_reason?: string | null
           transfer_template?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      plan_limits: {
+        Row: {
+          max_properties: number | null
+          max_rooms: number | null
+          max_staff: number | null
+          plan: string
+          sms_notification_enabled: boolean
+          tenant_portal_enabled: boolean
+        }
+        Insert: {
+          max_properties?: number | null
+          max_rooms?: number | null
+          max_staff?: number | null
+          plan: string
+          sms_notification_enabled?: boolean
+          tenant_portal_enabled?: boolean
+        }
+        Update: {
+          max_properties?: number | null
+          max_rooms?: number | null
+          max_staff?: number | null
+          plan?: string
+          sms_notification_enabled?: boolean
+          tenant_portal_enabled?: boolean
         }
         Relationships: []
       }
@@ -463,6 +500,56 @@ export type Database = {
           },
         ]
       }
+      subscription_payments: {
+        Row: {
+          amount: number
+          billing_cycle: string
+          created_at: string
+          id: string
+          org_id: string
+          payment_gateway_txn_id: string | null
+          payment_method: string
+          period_end: string
+          period_start: string
+          plan: string
+          status: string
+        }
+        Insert: {
+          amount: number
+          billing_cycle: string
+          created_at?: string
+          id?: string
+          org_id: string
+          payment_gateway_txn_id?: string | null
+          payment_method: string
+          period_end: string
+          period_start: string
+          plan: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          billing_cycle?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          payment_gateway_txn_id?: string | null
+          payment_method?: string
+          period_end?: string
+          period_start?: string
+          plan?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_payments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           auth_user_id: string | null
@@ -518,12 +605,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_set_tenant_credentials: {
+        Args: { p_password: string; p_tenant_id: string }
+        Returns: boolean
+      }
+      admin_toggle_org_suspension: {
+        Args: { p_org_id: string; p_reason?: string; p_suspend: boolean }
+        Returns: boolean
+      }
       can_delete_property: { Args: { p_property_id: string }; Returns: Json }
       can_delete_room: { Args: { p_room_id: string }; Returns: Json }
       can_delete_tenant: { Args: { p_tenant_id: string }; Returns: Json }
       get_auth_org_id: { Args: never; Returns: string }
       get_auth_tenant_id: { Args: never; Returns: string }
       get_tenant_auth_email: { Args: { p_identifier: string }; Returns: string }
+      is_platform_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

@@ -8,21 +8,37 @@ import { PropertyFormDialog } from "@/components/properties/property-form-dialog
 import { DeletePropertyDialog } from "@/components/properties/delete-property-dialog"
 import { Tables } from "@/types/database.types"
 
+import { PlanLimitBanner } from "@/components/dashboard/plan-limit-banner"
+import { type PlanUsageInfo } from "@/lib/subscription/check-limit"
+
 type RoomCount = { count: number }
 
 export type PropertyWithCount = Tables<"properties"> & {
   rooms?: RoomCount[] | RoomCount | null
 }
 
-export function PropertiesClient({ properties }: { properties: PropertyWithCount[] }) {
+export function PropertiesClient({
+  properties,
+  usage,
+}: {
+  properties: PropertyWithCount[]
+  usage?: PlanUsageInfo | null
+}) {
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Nhà trọ</h1>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Nhà trọ</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Quản lý các cơ sở, dãy nhà trọ và theo dõi danh sách phòng.
+          </p>
+        </div>
         <PropertyFormDialog
           trigger={<Button>Thêm nhà trọ</Button>}
         />
       </div>
+
+      {usage && <PlanLimitBanner usage={usage} />}
 
       {properties.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-12 text-center border rounded-lg bg-muted/50">

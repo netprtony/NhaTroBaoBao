@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { SettingsClient } from "@/components/settings/settings-client"
 import { Tables } from "@/types/database.types"
+import { getOrgPlanUsage } from "@/lib/subscription/check-limit"
 
 export const metadata = {
   title: "Cài đặt - BaoBao Stay",
@@ -29,6 +30,9 @@ export default async function SettingsPage() {
     redirect("/dashboard")
   }
 
+  // Lấy hạn mức gói đăng ký
+  const usage = await getOrgPlanUsage(profile.org_id)
+
   // Lấy thông tin tổ chức bao gồm các cài đặt thanh toán VietQR
   const { data: orgData, error: orgError } = await supabase
     .from("organizations")
@@ -46,6 +50,7 @@ export default async function SettingsPage() {
       organization={orgData as Tables<"organizations">}
       profile={profile as Tables<"profiles">}
       userEmail={user.email || ""}
+      usage={usage}
     />
   )
 }

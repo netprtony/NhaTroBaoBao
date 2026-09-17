@@ -20,6 +20,9 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+import { getOrgPlanUsage } from "@/lib/subscription/check-limit"
+import { PlanLimitBanner } from "@/components/dashboard/plan-limit-banner"
+
 export const metadata = { title: "Tổng quan - BaoBao Stay" }
 
 export default async function DashboardPage() {
@@ -44,6 +47,9 @@ export default async function DashboardPage() {
   if (!orgId) {
     redirect("/login")
   }
+
+  // Lấy thông tin hạn mức gói đăng ký
+  const planUsage = await getOrgPlanUsage(orgId)
 
   const orgData = Array.isArray(profile?.organizations)
     ? profile?.organizations[0]
@@ -252,6 +258,9 @@ export default async function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* Banner giới hạn gói đăng ký & Cảnh báo Chỉ đọc nếu quá hạn */}
+      <PlanLimitBanner usage={planUsage} />
 
       {/* 4 THẺ CHỈ SỐ KPI CHÍNH */}
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">

@@ -1,6 +1,7 @@
 "use server"
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { assertCanCreateRoom } from "@/lib/subscription/check-limit"
 
 type ActionState = { error?: string; success?: boolean } | null
 
@@ -12,6 +13,9 @@ export async function createRoom(prevState: ActionState, formData: FormData) {
     if (profileError || !profile?.org_id) {
       return { error: "Không tìm thấy thông tin tổ chức" }
     }
+
+    // Kiểm tra giới hạn gói đăng ký (Free/Basic/VIP)
+    await assertCanCreateRoom(profile.org_id)
 
     const propertyId = formData.get("propertyId") as string
     const roomCode = formData.get("roomCode") as string

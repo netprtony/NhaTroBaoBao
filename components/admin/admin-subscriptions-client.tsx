@@ -1,19 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState } from "react"
 import {
-  CreditCard,
   Crown,
   Search,
-  Calendar,
   Building2,
   User,
   CheckCircle2,
-  AlertTriangle,
   Loader2,
-  Plus,
   RefreshCw,
-  Sparkles,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -26,7 +22,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { manualRenewSubscription, changeOrgPlanDirectly } from "@/app/admin/subscriptions/actions"
@@ -57,9 +52,10 @@ export function AdminSubscriptionsClient({
 
   // Filter organizations
   const filteredOrgs = organizations.filter((org) => {
-    const nameMatch = org.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    const slugMatch = org.slug?.toLowerCase().includes(searchTerm.toLowerCase())
-    const ownerEmail = org.profiles?.[0]?.email || ""
+    const nameMatch = (org.name as string)?.toLowerCase().includes(searchTerm.toLowerCase())
+    const slugMatch = (org.slug as string)?.toLowerCase().includes(searchTerm.toLowerCase())
+    const profiles = org.profiles as { email?: string }[] | undefined
+    const ownerEmail = profiles?.[0]?.email || ""
     const emailMatch = ownerEmail.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesSearch = nameMatch || slugMatch || emailMatch
@@ -67,7 +63,7 @@ export function AdminSubscriptionsClient({
     if (planFilter === "all") return matchesSearch
     if (planFilter === "expiring") {
       if (!org.plan_expires_at) return false
-      const daysLeft = (new Date(org.plan_expires_at).getTime() - Date.now()) / (1000 * 3600 * 24)
+      const daysLeft = (new Date(org.plan_expires_at as string).getTime() - Date.now()) / (1000 * 3600 * 24)
       return matchesSearch && daysLeft >= 0 && daysLeft <= 7
     }
     return matchesSearch && org.plan === planFilter
@@ -90,8 +86,8 @@ export function AdminSubscriptionsClient({
           setMessage(null)
         }, 1500)
       }
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "Lỗi gia hạn thủ công" })
+    } catch (err: unknown) {
+      setMessage({ type: "error", text: (err as Error).message || "Lỗi gia hạn thủ công" })
     } finally {
       setIsSubmitting(false)
     }
@@ -103,8 +99,8 @@ export function AdminSubscriptionsClient({
       const res = await changeOrgPlanDirectly(orgId, newPlan)
       if (res.error) alert(res.error)
       else alert(res.message)
-    } catch (err: any) {
-      alert(err.message)
+    } catch (err: unknown) {
+      alert((err as Error).message)
     }
   }
 
@@ -254,9 +250,9 @@ export function AdminSubscriptionsClient({
                   const isExpiringSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7
                   const isExpired = daysLeft !== null && daysLeft < 0
 
-                  const totalPaidOrg = (org.subscription_payments || [])
-                    .filter((p: any) => p.status === "success")
-                    .reduce((sum: number, p: any) => sum + (p.amount || 0), 0)
+                  const totalPaidOrg = ((org.subscription_payments as Record<string, unknown>[]) || [])
+                    .filter((p) => p.status === "success")
+                    .reduce((sum: number, p) => sum + ((p.amount as number) || 0), 0)
 
                   return (
                     <tr key={org.id} className="hover:bg-slate-800/40 transition-colors">
@@ -349,8 +345,8 @@ export function AdminSubscriptionsClient({
                           </Button>
 
                           <Select
-                            onValueChange={(val: any) => handleChangePlan(org.id, val)}
-                            defaultValue={org.plan || "free"}
+                            onValueChange={(val: "free" | "basic" | "vip") => handleChangePlan(org.id as string, val)}
+                            defaultValue={(org.plan as string) || "free"}
                           >
                             <SelectTrigger className="h-7 w-24 bg-slate-950 border-slate-800 text-[11px] text-slate-300">
                               <SelectValue placeholder="Đổi gói" />

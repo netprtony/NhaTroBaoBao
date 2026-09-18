@@ -8,9 +8,7 @@ import {
   Copy,
   QrCode,
   CreditCard,
-  Building2,
   Loader2,
-  ShieldCheck,
   Zap,
 } from "lucide-react"
 import {
@@ -35,7 +33,6 @@ import {
   PLATFORM_BANK_INFO,
   type BillingCycle,
   type PaymentMethod,
-  type SubscriptionPlan,
 } from "@/lib/payment/vnpay"
 
 type CheckoutDialogProps = {
@@ -82,8 +79,8 @@ export function CheckoutDialog({
         setOrderResult(res)
         setStep("pay")
       }
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "Lỗi khởi tạo thanh toán" })
+    } catch (err: unknown) {
+      setMessage({ type: "error", text: (err as Error).message || "Lỗi khởi tạo thanh toán" })
     } finally {
       setIsSubmitting(false)
     }
@@ -105,8 +102,8 @@ export function CheckoutDialog({
           setOrderResult(null)
         }, 1800)
       }
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "Lỗi xác nhận thanh toán" })
+    } catch (err: unknown) {
+      setMessage({ type: "error", text: (err as Error).message || "Lỗi xác nhận thanh toán" })
     } finally {
       setIsConfirming(false)
     }

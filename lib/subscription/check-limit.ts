@@ -27,7 +27,7 @@ export async function getOrgPlanUsage(orgId: string): Promise<PlanUsageInfo> {
   const supabase = await createClient()
 
   // 1. Fetch organization details
-  const { data: org, error: orgError } = await supabase
+  const { data: org } = await supabase
     .from("organizations")
     .select("plan, plan_status, plan_expires_at")
     .eq("id", orgId)

@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Building2, CreditCard, History, LogOut, ShieldAlert, ShieldCheck } from "lucide-react"
+import { LayoutDashboard, Building2, CreditCard, LogOut, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { logout } from "@/app/(auth)/actions"
 
@@ -35,9 +37,13 @@ export function AdminSidebar({ adminName }: AdminSidebarProps) {
     <div className="flex h-full w-64 flex-col bg-slate-950 border-r border-slate-800 text-slate-200">
       {/* Brand header */}
       <div className="flex h-16 items-center gap-3 border-b border-slate-800 px-6">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-600/20 text-violet-400 border border-violet-500/30">
-          <ShieldCheck className="h-5 w-5" />
-        </div>
+        <Image
+          src="/mainlogo-removebg-preview.webp"
+          alt="BaoBao Stay Logo"
+          width={48}
+          height={48}
+          className="h-12 w-12 object-contain shrink-0"
+        />
         <div>
           <span className="font-bold text-white text-base tracking-wide block leading-tight">
             BaoBao Stay
@@ -70,7 +76,8 @@ export function AdminSidebar({ adminName }: AdminSidebarProps) {
               <Icon className={cn("h-4 w-4", isActive ? "text-white" : "text-slate-400")} />
               {item.title}
             </Link>
-          )}
+          )
+        }
         )}
       </div>
 

@@ -42,9 +42,9 @@ export default async function AdminSubscriptionsPage() {
     }
 
     if (org.subscription_payments) {
-      org.subscription_payments.forEach((p: any) => {
+      org.subscription_payments.forEach((p: Record<string, unknown>) => {
         if (p.status === "success") {
-          totalRevenue += p.amount || 0
+          totalRevenue += (p.amount as number) || 0
         }
       })
     }

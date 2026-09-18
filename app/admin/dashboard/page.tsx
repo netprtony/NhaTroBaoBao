@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import Link from "next/link"
-import { Building2, Home, Users, ShieldAlert, Receipt, ArrowRight, CheckCircle2, AlertOctagon } from "lucide-react"
+import { Building2, Home, Users, ShieldAlert, ArrowRight, CheckCircle2, AlertOctagon } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -19,14 +19,12 @@ export default async function AdminDashboardPage() {
     { count: totalProperties },
     { count: totalRooms },
     { count: totalTenants },
-    { count: totalInvoices },
   ] = await Promise.all([
     supabase.from("organizations").select("*", { count: "exact", head: true }),
     supabase.from("organizations").select("*", { count: "exact", head: true }).eq("is_suspended", true),
     supabase.from("properties").select("*", { count: "exact", head: true }),
     supabase.from("rooms").select("*", { count: "exact", head: true }),
     supabase.from("tenants").select("*", { count: "exact", head: true }).is("deleted_at", null),
-    supabase.from("invoices").select("*", { count: "exact", head: true }),
   ])
 
   // Fetch recent organizations with owner profiles

@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { Building2, Shield, Sparkles, BarChart3 } from "lucide-react"
+import Image from "next/image"
+import { Shield, Sparkles, BarChart3 } from "lucide-react"
 
 export default function AuthLayout({
   children,
@@ -12,11 +13,15 @@ export default function AuthLayout({
       <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div className="mb-8">
-            <Link href="/" className="flex items-center gap-2.5 font-bold text-xl group">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
-                <Building2 className="h-5 w-5" />
-              </div>
-              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <Link href="/" className="flex items-center gap-3 font-bold text-2xl group">
+              <Image
+                src="/mainlogo-removebg-preview.webp"
+                alt="BaoBao Stay Logo"
+                width={56}
+                height={56}
+                className="h-14 w-14 object-contain transition-transform group-hover:scale-110 shrink-0"
+              />
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 BaoBao Stay
               </span>
             </Link>
@@ -36,8 +41,14 @@ export default function AuthLayout({
           {/* Content */}
           <div className="relative z-10 text-center space-y-8 max-w-md">
             <div className="flex justify-center">
-              <div className="h-16 w-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
-                <Building2 className="h-8 w-8" />
+              <div className="h-28 w-28 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-2xl">
+                <Image
+                  src="/mainlogo-removebg-preview.webp"
+                  alt="BaoBao Stay Logo"
+                  width={80}
+                  height={80}
+                  className="h-20 w-20 object-contain drop-shadow-lg"
+                />
               </div>
             </div>
 

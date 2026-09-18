@@ -7,13 +7,13 @@ export type BackupPayload = {
   version: string
   exported_at: string
   data: {
-    properties: any[]
-    rooms: any[]
-    tenants: any[]
-    leases: any[]
-    invoices: any[]
-    invoice_items: any[]
-    meter_readings: any[]
+    properties: Record<string, unknown>[]
+    rooms: Record<string, unknown>[]
+    tenants: Record<string, unknown>[]
+    leases: Record<string, unknown>[]
+    invoices: Record<string, unknown>[]
+    invoice_items: Record<string, unknown>[]
+    meter_readings: Record<string, unknown>[]
   }
 }
 
@@ -76,15 +76,15 @@ export async function exportAllDataJSON(): Promise<{ success?: boolean; error?: 
 
     downloadFile(jsonStr, fileName, "application/json")
     return { success: true }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Lỗi xuất backup JSON:", err)
-    return { error: err.message || "Không thể xuất file dữ liệu" }
+    return { error: (err as Error).message || "Không thể xuất file dữ liệu" }
   }
 }
 
 // Helper chuyển array sang CSV với UTF-8 BOM chuẩn Excel tiếng Việt
 export function exportToCSV(fileName: string, headers: string[], rows: (string | number | null | undefined)[][]) {
-  const escapeCSV = (val: any) => {
+  const escapeCSV = (val: unknown) => {
     if (val === null || val === undefined) return '""'
     const str = String(val).replace(/"/g, '""')
     return `"${str}"`
@@ -111,15 +111,18 @@ export async function exportRoomsCSV() {
   }
 
   const headers = ["Mã phòng", "Tên nhà trọ", "Địa chỉ", "Diện tích (m²)", "Giá thuê (VNĐ)", "Trạng thái", "Ngày tạo"]
-  const rows = rooms.map((r: any) => [
-    r.room_code,
-    r.property?.name || "",
-    r.property?.address || "",
-    r.area || 0,
-    r.base_price,
-    r.status === "available" ? "Trống" : r.status === "occupied" ? "Đang thuê" : "Bảo trì",
-    new Date(r.created_at).toLocaleDateString("vi-VN"),
-  ])
+  const rows = rooms.map((r: Record<string, unknown>) => {
+    const prop = r.property as { name?: string; address?: string } | null
+    return [
+      r.room_code as string,
+      prop?.name || "",
+      prop?.address || "",
+      (r.area as number) || 0,
+      r.base_price as number,
+      r.status === "available" ? "Trống" : r.status === "occupied" ? "Đang thuê" : "Bảo trì",
+      new Date(r.created_at as string).toLocaleDateString("vi-VN"),
+    ]
+  })
 
   exportToCSV(`DanhSachPhong_${new Date().toISOString().split("T")[0]}.csv`, headers, rows)
 }
@@ -136,20 +139,23 @@ export async function exportInvoicesCSV() {
   }
 
   const headers = ["Kỳ thu tiền", "Phòng", "Khách thuê", "SĐT", "Tiền phòng", "Tiền điện", "Tiền nước", "Phụ phí", "Tổng tiền", "Hạn nộp", "Trạng thái", "Ngày thu"]
-  const rows = invoices.map((inv: any) => [
-    inv.period,
-    inv.lease?.room?.room_code || "",
-    inv.lease?.tenant?.full_name || "",
-    inv.lease?.tenant?.phone || "",
-    inv.rent_amount,
-    inv.electricity_amount,
-    inv.water_amount,
-    inv.other_fees,
-    inv.total_amount,
-    inv.due_date,
-    inv.status === "paid" ? "Đã thanh toán" : "Chưa thanh toán",
-    inv.paid_at ? new Date(inv.paid_at).toLocaleDateString("vi-VN") : "",
-  ])
+  const rows = invoices.map((inv: Record<string, unknown>) => {
+    const lease = inv.lease as { room?: { room_code?: string }; tenant?: { full_name?: string; phone?: string } } | null
+    return [
+      inv.period as string,
+      lease?.room?.room_code || "",
+      lease?.tenant?.full_name || "",
+      lease?.tenant?.phone || "",
+      inv.rent_amount as number,
+      inv.electricity_amount as number,
+      inv.water_amount as number,
+      inv.other_fees as number,
+      inv.total_amount as number,
+      inv.due_date as string,
+      inv.status === "paid" ? "Đã thanh toán" : "Chưa thanh toán",
+      inv.paid_at ? new Date(inv.paid_at as string).toLocaleDateString("vi-VN") : "",
+    ]
+  })
 
   exportToCSV(`DanhSachHoaDon_${new Date().toISOString().split("T")[0]}.csv`, headers, rows)
 }
@@ -166,18 +172,24 @@ export async function exportMeterReadingsCSV() {
   }
 
   const headers = ["Nhà trọ", "Phòng", "Kỳ chốt", "Loại", "Chỉ số cũ", "Chỉ số mới", "Tiêu thụ", "Đơn giá", "Thành tiền", "Ngày ghi"]
-  const rows = readings.map((m: any) => [
-    m.room?.property?.name || "",
-    m.room?.room_code || "",
-    m.period,
-    m.type === "electricity" ? "Điện" : "Nước",
-    m.old_value,
-    m.new_value,
-    m.consumption !== null ? m.consumption : Math.max(0, m.new_value - m.old_value),
-    m.unit_price,
-    m.total_amount,
-    m.reading_date || "",
-  ])
+  const rows = readings.map((m: Record<string, unknown>) => {
+    const room = m.room as { room_code?: string; property?: { name?: string } } | null
+    const oldVal = (m.old_value as number) || 0
+    const newVal = (m.new_value as number) || 0
+    const consumption = m.consumption !== null ? (m.consumption as number) : Math.max(0, newVal - oldVal)
+    return [
+      room?.property?.name || "",
+      room?.room_code || "",
+      m.period as string,
+      m.type === "electricity" ? "Điện" : "Nước",
+      oldVal,
+      newVal,
+      consumption,
+      m.unit_price as number,
+      m.total_amount as number,
+      (m.reading_date as string) || "",
+    ]
+  })
 
   exportToCSV(`ChiSoDienNuoc_${new Date().toISOString().split("T")[0]}.csv`, headers, rows)
 }

@@ -154,9 +154,16 @@ export async function toggleTenantPortalAccess(prevState: ActionState, formData:
     }
 
     // Call the secure RPC to create the auth user or update password
-    const { error: rpcError } = await (supabase as any).rpc("admin_set_tenant_credentials", {
+    const { error: rpcError } = await (
+      supabase as unknown as {
+        rpc: (
+          fn: string,
+          args: { p_tenant_id: string; p_password?: string }
+        ) => Promise<{ error: { message: string } | null }>
+      }
+    ).rpc("admin_set_tenant_credentials", {
       p_tenant_id: tenantId,
-      p_password: password || "", // if empty, the RPC might still set it but we should require it
+      p_password: password || "",
     })
 
     if (rpcError) {

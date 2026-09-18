@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true, message: "Webhook processed" })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: (err as Error).message || "Internal server error" }, { status: 500 })
   }
 }

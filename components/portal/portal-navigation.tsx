@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { LayoutDashboard, Receipt, FileText, Zap, Settings, LogOut, Building2 } from "lucide-react"
@@ -37,9 +38,13 @@ export function PortalNavigation({ tenantName, orgName, children }: PortalNaviga
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 flex-col bg-slate-900 border-r border-slate-800 fixed inset-y-0 z-30">
         <div className="p-5 border-b border-slate-800 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-600/30">
-            <Building2 className="h-5 w-5" />
-          </div>
+          <Image
+            src="/mainlogo-removebg-preview.webp"
+            alt="BaoBao Stay Logo"
+            width={44}
+            height={44}
+            className="h-11 w-11 object-contain shrink-0"
+          />
           <div>
             <h2 className="font-bold text-white text-sm truncate">{orgName || "Cổng Khách Thuê"}</h2>
             <span className="text-[11px] font-medium text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">

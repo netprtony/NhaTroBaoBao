@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { toggleOrgSuspensionAction } from "@/app/admin/actions"
+import { toggleOrgSuspensionAction, type ActionState } from "@/app/admin/actions"
 
 interface SuspendOrgDialogProps {
   orgId: string
@@ -32,7 +32,7 @@ export function SuspendOrgDialog({
   trigger,
 }: SuspendOrgDialogProps) {
   const [open, setOpen] = useState(false)
-  const [state, formAction, isPending] = useActionState(async (prev: any, formData: FormData) => {
+  const [state, formAction, isPending] = useActionState(async (prev: ActionState, formData: FormData) => {
     const res = await toggleOrgSuspensionAction(prev, formData)
     if (res?.success) {
       setOpen(false)
@@ -115,7 +115,7 @@ export function SuspendOrgDialog({
                 Tổ chức này hiện đang bị khóa với lý do:
               </p>
               <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 text-amber-300 italic">
-                "{currentReason || "Không có lý do cụ thể"}"
+                &ldquo;{currentReason || "Không có lý do cụ thể"}&rdquo;
               </div>
               <p className="text-slate-400">
                 Bạn có chắc chắn muốn khôi phục lại quyền truy cập hệ thống cho tổ chức này?

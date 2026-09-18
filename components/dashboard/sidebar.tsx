@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { LayoutDashboard, Building2, Users, FileText, Receipt, Zap, Settings, LogOut } from "lucide-react"
@@ -26,10 +27,14 @@ export function Sidebar({ orgName, userName, userRole }: SidebarProps) {
 
   return (
     <div className="flex h-full w-64 flex-col overflow-y-auto border-r bg-white">
-      <div className="flex h-16 shrink-0 items-center px-6 border-b">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white mr-3">
-          <Building2 className="h-5 w-5" />
-        </div>
+      <div className="flex h-16 shrink-0 items-center px-6 border-b gap-2.5">
+        <Image
+          src="/mainlogo-removebg-preview.webp"
+          alt="BaoBao Stay Logo"
+          width={44}
+          height={44}
+          className="h-11 w-11 object-contain shrink-0"
+        />
         <span className="text-xl font-bold tracking-tight text-slate-900">BaoBao Stay</span>
       </div>
       <nav className="flex-1 space-y-1 px-4 py-4">

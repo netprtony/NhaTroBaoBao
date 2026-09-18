@@ -142,13 +142,14 @@ export default async function InvoicesPage() {
   const rawInvoices = invoicesData || []
   const rawReadings = meterReadingsData || []
 
-  const invoices = rawInvoices.map((inv: any) => {
-    let readings = inv.meter_readings || []
-    if ((!readings || readings.length === 0) && inv.lease?.room?.id && inv.period) {
-      const roomId = inv.lease.room.id
-      const period = inv.period
+  const invoices = rawInvoices.map((inv: Record<string, unknown>) => {
+    let readings = (inv.meter_readings as Record<string, unknown>[]) || []
+    const lease = inv.lease as { room?: { id?: string } } | undefined
+    if ((!readings || readings.length === 0) && lease?.room?.id && inv.period) {
+      const roomId = lease.room.id
+      const period = inv.period as string
       const matched = rawReadings.filter(
-        (m: any) => m.room_id === roomId && m.period === period
+        (m: Record<string, unknown>) => m.room_id === roomId && m.period === period
       )
       if (matched.length > 0) {
         readings = matched

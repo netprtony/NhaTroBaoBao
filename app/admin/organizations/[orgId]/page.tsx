@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { Building2, ArrowLeft, CheckCircle2, AlertOctagon, Home, Users, Receipt, User, ShieldAlert } from "lucide-react"
+import { Building2, ArrowLeft, CheckCircle2, AlertOctagon, Users, Receipt, User, ShieldAlert } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

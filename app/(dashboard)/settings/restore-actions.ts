@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
@@ -170,8 +171,8 @@ export async function restoreFromBackupJSON(input: BackupDataInput) {
       success: true,
       message: `Đã khôi phục thành công ${restoredCount} bản ghi dữ liệu từ file sao lưu JSON!`,
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Lỗi khôi phục dữ liệu:", err)
-    return { error: err.message || "Đã xảy ra lỗi khi đọc file sao lưu." }
+    return { error: (err as Error).message || "Đã xảy ra lỗi khi đọc file sao lưu." }
   }
 }

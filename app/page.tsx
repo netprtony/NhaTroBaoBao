@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { 
   Building2, 
   Home, 
@@ -17,9 +18,13 @@ export default function HomePage() {
       <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-md">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-              <Building2 className="h-5 w-5" />
-            </div>
+            <Image
+              src="/mainlogo-removebg-preview.webp"
+              alt="BaoBao Stay Logo"
+              width={48}
+              height={48}
+              className="h-12 w-12 object-contain shrink-0"
+            />
             <div>
               <span className="text-xl font-bold tracking-tight text-slate-900">BaoBao Stay</span>
               <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">

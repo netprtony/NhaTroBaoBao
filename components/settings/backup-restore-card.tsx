@@ -40,8 +40,8 @@ export function BackupRestoreCard() {
       } else {
         setMessage({ type: "success", text: "✓ Đã tải file sao lưu JSON về máy thành công!" })
       }
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "Lỗi khi sao lưu dữ liệu JSON" })
+    } catch (err: unknown) {
+      setMessage({ type: "error", text: (err as Error).message || "Lỗi khi sao lưu dữ liệu JSON" })
     } finally {
       setIsExporting(false)
     }
@@ -57,8 +57,8 @@ export function BackupRestoreCard() {
       else if (type === "readings") await exportMeterReadingsCSV()
 
       setMessage({ type: "success", text: "✓ Đã xuất file CSV (Excel) thành công!" })
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "Không thể xuất file CSV" })
+    } catch (err: unknown) {
+      setMessage({ type: "error", text: (err as Error).message || "Không thể xuất file CSV" })
     } finally {
       setIsExporting(false)
     }
@@ -88,8 +88,8 @@ export function BackupRestoreCard() {
       } else {
         setMessage({ type: "success", text: res.message || "✓ Đã khôi phục dữ liệu thành công!" })
       }
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "File JSON không hợp lệ." })
+    } catch (err: unknown) {
+      setMessage({ type: "error", text: (err as Error).message || "File JSON không hợp lệ." })
     } finally {
       setIsRestoring(false)
       if (fileInputRef.current) fileInputRef.current.value = ""

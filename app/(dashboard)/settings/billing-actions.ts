@@ -48,7 +48,8 @@ export async function createSubscriptionOrder(
     }
 
     const orgId = profile.org_id
-    const orgSlug = (profile.organizations as any)?.slug || orgId.slice(0, 8)
+    const orgObj = profile.organizations as { slug?: string } | null
+    const orgSlug = orgObj?.slug || orgId.slice(0, 8)
     const amount = calculatePlanAmount(plan, cycle)
 
     const now = new Date()
@@ -95,8 +96,8 @@ export async function createSubscriptionOrder(
       billingCycle: cycle,
       paymentMethod,
     }
-  } catch (err: any) {
-    return { error: err.message || "Lỗi hệ thống khi khởi tạo thanh toán." }
+  } catch (err: unknown) {
+    return { error: (err as Error).message || "Lỗi hệ thống khi khởi tạo thanh toán." }
   }
 }
 
@@ -176,8 +177,8 @@ export async function confirmSimulatedPayment(paymentId: string) {
     revalidatePath("/invoices")
 
     return { message: `✓ Nâng cấp/Gia hạn thành công gói ${plan.toUpperCase()} đến ngày ${newExpiryDate.toLocaleDateString("vi-VN")}` }
-  } catch (err: any) {
-    return { error: err.message || "Lỗi khi xác nhận thanh toán." }
+  } catch (err: unknown) {
+    return { error: (err as Error).message || "Lỗi khi xác nhận thanh toán." }
   }
 }
 
@@ -194,8 +195,8 @@ export async function cancelPendingOrder(paymentId: string) {
 
     revalidatePath("/settings")
     return { message: "Đã hủy đơn hàng thanh toán." }
-  } catch (err: any) {
-    return { error: err.message || "Không thể hủy đơn hàng." }
+  } catch (err: unknown) {
+    return { error: (err as Error).message || "Không thể hủy đơn hàng." }
   }
 }
 

@@ -24,7 +24,14 @@ export async function toggleOrgSuspensionAction(prevState: ActionState, formData
     }
 
     // Call the security definer RPC function admin_toggle_org_suspension
-    const { error: rpcError } = await (supabase as any).rpc("admin_toggle_org_suspension", {
+    const { error: rpcError } = await (
+      supabase as unknown as {
+        rpc: (
+          fn: string,
+          args: { p_org_id: string; p_suspend: boolean; p_reason: string | null }
+        ) => Promise<{ error: { message: string } | null }>
+      }
+    ).rpc("admin_toggle_org_suspension", {
       p_org_id: orgId,
       p_suspend: isSuspend,
       p_reason: reason,

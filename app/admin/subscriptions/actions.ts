@@ -74,7 +74,7 @@ export async function manualRenewSubscription(formData: FormData) {
         amount,
         billing_cycle: months >= 12 ? "yearly" : "monthly",
         payment_method: "bank_transfer",
-        payment_gateway_txn_id: `MANUAL_RENEW_${Date.now()}`,
+        payment_gateway_txn_id: `MANUAL_${Date.now()}_${reason.slice(0, 15)}`,
         status: "success",
         period_start: periodStart.toISOString(),
         period_end: periodEnd.toISOString(),
@@ -86,8 +86,8 @@ export async function manualRenewSubscription(formData: FormData) {
     revalidatePath("/admin/dashboard")
 
     return { success: true, message: `✓ Đã gia hạn ${months} tháng gói ${plan.toUpperCase()} cho tổ chức thành công!` }
-  } catch (err: any) {
-    return { error: err.message || "Lỗi khi gia hạn thủ công." }
+  } catch (err: unknown) {
+    return { error: (err as Error).message || "Lỗi khi gia hạn thủ công." }
   }
 }
 
@@ -134,7 +134,7 @@ export async function changeOrgPlanDirectly(orgId: string, newPlan: "free" | "ba
     revalidatePath("/admin/organizations")
 
     return { success: true, message: `✓ Đã chuyển tổ chức sang gói ${newPlan.toUpperCase()}` }
-  } catch (err: any) {
-    return { error: err.message || "Không thể chuyển gói." }
+  } catch (err: unknown) {
+    return { error: (err as Error).message || "Không thể chuyển gói." }
   }
 }

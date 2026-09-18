@@ -18,7 +18,6 @@ export function PlanLimitBanner({ usage, compact = false }: PlanLimitBannerProps
   if (dismissed) return null
 
   const isFree = usage.plan === "free"
-  const isBasic = usage.plan === "basic"
   const isVip = usage.plan === "vip"
 
   // 1. Cảnh báo tài khoản Hết hạn / Quá hạn (Chế độ Chỉ đọc)

@@ -1,6 +1,7 @@
 import { portalLogin } from "@/app/portal/actions"
 import { PortalLoginForm } from "./login-form"
-import { Building2, ShieldCheck } from "lucide-react"
+import Image from "next/image"
+import { ShieldCheck } from "lucide-react"
 
 export const metadata = {
   title: "Đăng nhập Cổng Khách thuê - BaoBao Stay",
@@ -18,10 +19,14 @@ export default async function PortalLoginPage(props: {
       
       <div className="w-full max-w-md space-y-6 relative z-10">
         {/* Brand Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/30 mb-2">
-            <Building2 className="h-7 w-7" />
-          </div>
+        <div className="text-center space-y-2 flex flex-col items-center">
+          <Image
+            src="/mainlogo-removebg-preview.webp"
+            alt="BaoBao Stay Logo"
+            width={96}
+            height={96}
+            className="h-24 w-24 object-contain mb-2 drop-shadow-xl"
+          />
           <h1 className="text-2xl font-bold tracking-tight text-white">BaoBao Stay</h1>
           <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-400 border border-blue-500/20">
             <ShieldCheck className="h-3.5 w-3.5" />
